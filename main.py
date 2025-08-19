@@ -1,3 +1,27 @@
+# AryNetScan 🎯
+# Copyright (C) 2025 Aryan
+#
+# This file is part of AryNetScan.
+#
+# AryNetScan is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# AryNetScan is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with AryNetScan. If not, see <https://www.gnu.org/licenses/>.
+#
+# Description:
+# AryNetScan is a Windows-based network scanning tool that discovers devices on your local network
+# including IP addresses, MAC addresses, hostnames, and vendors.
+# Features include multiple scan modes, threaded scanning, pause/resume/stop controls, copy results,
+# and network interface selection.
+
 # ------------------- Imports -------------------
 import socket
 import threading
@@ -242,3 +266,4 @@ tk.Button(root, text="Show Network Interfaces (ipconfig)", bg="#444", fg="white"
 root.after(500, update_tree)
 
 root.mainloop()
+
