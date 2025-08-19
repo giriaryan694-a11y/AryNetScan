@@ -203,7 +203,7 @@ def copy_selected_devices():
 
 # ------------------- GUI -------------------
 root = tk.Tk()
-root.title("Aryan's LAN Scanner 🎯")
+root.title("AryNetScan🎯")
 root.geometry("860x650")
 root.configure(bg="#111")
 
@@ -266,4 +266,5 @@ tk.Button(root, text="Show Network Interfaces (ipconfig)", bg="#444", fg="white"
 root.after(500, update_tree)
 
 root.mainloop()
+
 
