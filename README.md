@@ -37,7 +37,7 @@ Install required modules via pip if not already installed:
 
 ## Usage
 
-1. Run the script:
+1. Run the script as administrator:
 
     python main.py
 
