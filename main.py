@@ -49,7 +49,6 @@ def parse_ipconfig():
     ipv4 = None
     subnet = None
     gateway = None
-
     for line in output.splitlines():
         line = line.strip()
         if line.endswith(":") and ("adapter" in line.lower()):
@@ -63,10 +62,8 @@ def parse_ipconfig():
             subnet = line.split(":")[-1].strip()
         elif "Default Gateway" in line:
             gateway = line.split(":")[-1].strip()
-
     if current_adapter and ipv4:
         adapters.append((current_adapter, ipv4, subnet, gateway))
-
     return adapters, output
 
 def get_ip_range_for_ip(ip):
@@ -90,7 +87,6 @@ def scan_ip(ip, delay=0):
     if stop_event.is_set():
         return
     pause_event.wait()
-
     arp = ARP(pdst=ip)
     ether = Ether(dst="ff:ff:ff:ff:ff:ff")
     packet = ether / arp
@@ -123,7 +119,6 @@ def scan_network_threaded(mode="Fast"):
     if not selected:
         messagebox.showerror("No Interface", "Please select an interface first.")
         return
-
     m = re.search(r"IPv4: ([0-9.]+)", selected)
     if not m:
         messagebox.showerror("Error", "Could not parse IP from selected interface.")
@@ -133,13 +128,11 @@ def scan_network_threaded(mode="Fast"):
     if not ip_list:
         messagebox.showerror("Error", f"Could not get IP range for {selected_ip}")
         return
-
     scan_button.config(state=tk.DISABLED)
     stop_event.clear()
     pause_event.set()
     tree.delete(*tree.get_children())
-    status_label.config(text="Scanning...")  # <-- Start scanning
-
+    status_label.config(text="Scanning...")
     if mode == "Fast":
         thread_count = 100
         delay = 0
@@ -158,15 +151,12 @@ def scan_network_threaded(mode="Fast"):
     else:
         thread_count = 50
         delay = 0.3
-
     start_time = time.time()
-
     with ThreadPoolExecutor(max_workers=thread_count) as executor:
         for ip in ip_list:
             if stop_event.is_set():
                 break
             executor.submit(scan_ip, ip, delay)
-
     scan_button.config(state=tk.NORMAL)
     duration = round(time.time() - start_time, 2)
     if stop_event.is_set():
@@ -174,7 +164,7 @@ def scan_network_threaded(mode="Fast"):
         messagebox.showinfo("Scan Stopped", f"The scan was stopped manually after {duration} seconds.")
     else:
         total = len(tree.get_children())
-        status_label.config(text="Scan Completed")  # <-- Scan completed
+        status_label.config(text="Scan Completed")
         messagebox.showinfo("Scan Completed", f"Scan finished in {duration} seconds.\nDevices Found: {total}")
 
 # ------------------- Show Interfaces Popup -------------------
@@ -192,11 +182,17 @@ def show_interfaces_popup():
 def copy_selected_devices():
     selected_items = tree.selection()
     if not selected_items:
+        messagebox.showwarning("No Selection", "No devices selected to copy.")
         return
     copied_text = ""
     for item in selected_items:
         values = tree.item(item, 'values')
-        copied_text += f"IP: {values[0]}, MAC: {values[1]}, Vendor: {values[3]}\n"
+        copied_text += (
+            f"IP: {values[0]}\n"
+            f"Hostname: {values[2]}\n"
+            f"MAC: {values[1]}\n"
+            f"Vendor: {values[3]}\n\n"
+        )
     root.clipboard_clear()
     root.clipboard_append(copied_text.strip())
     messagebox.showinfo("Copied", "Selected devices copied to clipboard.")
@@ -206,9 +202,7 @@ root = tk.Tk()
 root.title("AryNetScan🎯")
 root.geometry("860x650")
 root.configure(bg="#111")
-
 scan_mode = tk.StringVar(value="Fast")
-
 style = ttk.Style()
 style.theme_use("clam")
 style.configure("Treeview", background="#222", foreground="#fff", rowheight=25, fieldbackground="#111")
@@ -228,13 +222,11 @@ tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 # Buttons
 btn_frame = tk.Frame(root, bg="#111")
 btn_frame.pack(pady=10)
-
 scan_button = tk.Button(btn_frame, text="▶ Start", command=lambda: threading.Thread(target=scan_network_threaded, args=(scan_mode.get(),), daemon=True).start(), bg="#444", fg="white", width=10)
 pause_button = tk.Button(btn_frame, text="⏸ Pause", command=lambda: pause_event.clear(), bg="#555", fg="white", width=10)
 resume_button = tk.Button(btn_frame, text="▶ Resume", command=lambda: pause_event.set(), bg="#666", fg="white", width=10)
 stop_button = tk.Button(btn_frame, text="⏹ Stop", command=lambda: [stop_event.set(), pause_event.set(), scan_button.config(state=tk.NORMAL)], bg="#800", fg="white", width=10)
 copy_button = tk.Button(btn_frame, text="📋 Copy Selected", command=copy_selected_devices, bg="#228", fg="white", width=14)
-
 scan_button.grid(row=0, column=0, padx=6)
 pause_button.grid(row=0, column=1, padx=6)
 resume_button.grid(row=0, column=2, padx=6)
@@ -251,7 +243,6 @@ mode_dropdown.current(0)
 # Interface dropdown
 iface_label = tk.Label(root, text="Select Interface:", bg="#111", fg="white", font=("Arial", 10, "bold"))
 iface_label.pack()
-
 adapters, _ = parse_ipconfig()
 iface_values = [f"{a[0]} | IPv4: {a[1]} | Subnet: {a[2]} | Gateway: {a[3]}" for a in adapters]
 iface_dropdown = ttk.Combobox(root, values=iface_values, state="readonly")
@@ -262,9 +253,16 @@ if iface_values:
 # Show network info button
 tk.Button(root, text="Show Network Interfaces (ipconfig)", bg="#444", fg="white", font=("Arial", 10, "bold"), command=show_interfaces_popup).pack(pady=5)
 
+# Footer label for attribution
+footer_label = tk.Label(
+    root,
+    text="Made by Aryan Giri",
+    bg="#111",
+    fg="#aaa",
+    font=("Arial", 8, "italic")
+)
+footer_label.pack(side="bottom", pady=5)
+
 # Start updating Treeview from queue
 root.after(500, update_tree)
-
 root.mainloop()
-
-
